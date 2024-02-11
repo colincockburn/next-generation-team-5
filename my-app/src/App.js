@@ -15,6 +15,7 @@ function App() {
   const messagesEndRef = useRef(null); // Add this line
   const [startDiagnosis, setStartDiagnosis] = useState(false);
   const [convoFinished, setConvoFinished] = useState(false);
+  const [diagnosisSubmitted, setDiagnosisSubmitted] = useState(false);
   // Define gradientStyle
   
   const gradientStyle = {
@@ -24,6 +25,7 @@ function App() {
   // Define handleExitClick
   const handleExitClick = () => {
     setStartDiagnosis(false);
+    setConvoFinished(false);
     setThread(createThread())
     setMessages(["Patient: Hello doctor."])
     setAssistant(createAssistant(aiInstructions))
@@ -39,6 +41,10 @@ function App() {
     setStartDiagnosis(false);
   };
 
+  const handleDiagnosisSubmitted = () => {
+    setConvoFinished(false);
+    setDiagnosisSubmitted(true);
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -74,11 +80,6 @@ function App() {
       <div style={gradientStyle} className="flex flex-col h-screen text-white">
         {/* Header with centered text and exit button */}
         <div className="flex justify-between items-center w-full p-4">
-          <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
-          <span className="text-center font-Raleway font-light text-xl mt-4">Initiate conversation...</span>
-          <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
-            Exit diagnosis ✖
-          </button>
         </div>
         
         {/* Main content */}
@@ -136,9 +137,37 @@ function App() {
             />
           </div>
           <button
+          onClick={handleDiagnosisSubmitted}
             className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
           >
             Submit Diagnosis
+          </button>
+        </div>
+      </div>
+    );
+  }
+  else if (diagnosisSubmitted) {
+    return (
+      <div style={gradientStyle} className="flex flex-col h-screen text-white">
+        {/* Header with centered text and exit button */}
+        <div className="flex justify-between items-center w-full p-4">
+          <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
+          <span className="text-center font-Raleway font-light text-xl mt-4">Evlauation</span>
+          <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
+            Exit diagnosis ✖
+          </button>
+        </div>
+        
+        {/* Main content */}
+        <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
+          {/* Flex container for microphone and input */}
+          <div className="flex items-center space-x-4">
+
+          </div>
+          <button
+            className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
+          >
+            Finish
           </button>
         </div>
       </div>
