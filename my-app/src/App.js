@@ -8,6 +8,7 @@ const { createAssistant, createThread, getChatResponse } = require('./openai-too
 
 function App() {
   const [input, setInput] = useState('');
+  const [diagnosisUserInput, setDiagnosisUserInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [assistant, setAssistant] = useState(null);
   const [thread, setThread] = useState(null);
@@ -33,7 +34,20 @@ function App() {
     setThread(createThread())
     setMessages(["Patient: Hello doctor."])
     setStartDiagnosis(false);
+    setDiagnosisSubmitted(false);
     setTestState("Diagnosis in progress");
+  };
+
+  const handleExitFromDiagnosis = () => {
+    setAssistant(assistant);
+    setThread(thread);
+    setStartDiagnosis(false);
+    setConvoFinished(false);
+    setDiagnosisSubmitted(false);
+    setThread(createThread())
+    setMessages(["Patient: Hello doctor."])
+    setTestState("Diagnosis in progress");
+    setDiagnosisUserInput('');
   };
 
   // Define handleStartClick
@@ -45,7 +59,7 @@ function App() {
     if (isThinking) {
       setTestState("Patient is thinking...");
     } else {
-      setTestState("patient is waiting for a responce");
+      setTestState("Patient is waiting for a response.");
     }
   }, [isThinking]);
 
@@ -55,8 +69,8 @@ function App() {
   };
 
   const handleDiagnosisSubmitted = () => {
-    setConvoFinished(false);
-    setDiagnosisSubmitted(true);
+    setDiagnosisSubmitted(true); // Set diagnosisSubmitted to true first
+    setConvoFinished(false); // Then set convoFinished to true
   };
 
   useEffect(() => {
@@ -76,6 +90,10 @@ function App() {
     setInput(event.target.value);
   };
 
+  const handleDiagnosisInputChange = (event) => {
+    setDiagnosisUserInput(event.target.value);
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent the form from refreshing the page
     setIsThinking(true); // Set isThinking to true
@@ -89,40 +107,7 @@ function App() {
 
 
   if (startDiagnosis) {
-    return (
-      <div style={gradientStyle} className="flex flex-col h-screen text-white">
-        {/* Header with centered text and exit button */}
-        <div className="flex justify-between items-center w-full p-4">
-        </div>
-        
-        {/* Main content */}
-        <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
-          {/* Flex container for microphone and input */}
-          <div className="flex items-center space-x-4">
-            {/* Microphone icon */}
-            <button className="text-xl mb-6">🎤</button>
-
-            {/* Input field */}
-            <input
-              type="text"
-              placeholder="Ask a question..."
-              className="w-full mx-4 px-2 py-2 rounded-xl text-md mb-6 font-Raleway text-white"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-            />
-          </div>
-
-          {/* Finish conversation button */}
-          <button
-            onClick={handleConvoFinished}
-            className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
-          >
-            Finish Conversation
-          </button>
-        </div>
-      </div>
-    );
-  }
-  else if (convoFinished) {
+    // Conversation page
     return (
       <div style={gradientStyle} className="flex flex-col h-screen text-white">
         {/* Header with centered text and exit button */}
@@ -138,7 +123,7 @@ function App() {
         {/* Main content */}
         <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
           {/* Chat messages */}
-          <div className="h-[60vh] w-[40vw] bg-white text-black overflow-auto p-4 rounded-xl mb-4 flex flex-col">
+          <div className="h-[60vh] w-[40vw] bg-[#565656] text-white bg-opacity-40 overflow-auto p-4 rounded-xl mb-4 flex flex-col">
             {messages.map((message, index) => (
               <div key={index} className="whitespace-pre-line">{message}</div>
             ))}
@@ -166,10 +151,43 @@ function App() {
 
           </div>
           <button
-          onClick={handleDiagnosisSubmitted}
+          onClick={handleConvoFinished}
             className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
           >
-            Submit Diagnosis
+            Finish conversation
+          </button>
+        </div>
+      </div>
+    );
+  } else if (convoFinished) { 
+    // Enter diagnosis page
+    return (
+      <div style={gradientStyle} className="flex flex-col h-screen text-white">
+        {/* Header with centered text and exit button */}
+        <div className="flex justify-between items-center w-full p-4">
+          <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
+          <span className="text-center font-Raleway font-light text-xl mt-4">Enter your detailed diagnosis</span>
+          <button onClick={handleExitFromDiagnosis} className="font-Raleway text-xl mt-4 mr-4">
+            Exit diagnosis ✖
+          </button>
+        </div>
+        
+        {/* Main content */}
+        <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
+          <input
+                type="text"
+                placeholder="Enter your diagnosis..."
+                className="w-1/2 mx-4 px-2 py-2 rounded-xl text-md mb-6 font-Raleway text-white"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                onChange={handleDiagnosisInputChange}
+                value={diagnosisUserInput}
+              />
+          <button
+            onClick={handleDiagnosisSubmitted}
+            className="font-Raleway text-[#0A2735] font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
+            style={{ backgroundColor: '#15C99B' }}
+          >
+            Submit diagnosis
           </button>
         </div>
       </div>
@@ -181,7 +199,7 @@ function App() {
         {/* Header with centered text and exit button */}
         <div className="flex justify-between items-center w-full p-4">
           <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
-          <span className="text-center font-Raleway font-light text-xl mt-4">Evlauation</span>
+          <span className="text-center font-Raleway font-light text-xl mt-4">Evaluation</span>
           <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
             Exit diagnosis ✖
           </button>
@@ -191,9 +209,11 @@ function App() {
         <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
           {/* Flex container for microphone and input */}
           <div className="flex items-center space-x-4">
-
+            <p className="font-Raleway text-2xl text-center">
+              Your diagnosis has been submitted. Thank you for your time.
+            </p>
           </div>
-          <button
+          <button onClick={handleExitClick}
             className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
           >
             Finish
@@ -203,16 +223,17 @@ function App() {
     );
   }
   else {
+    // HOME PAGE
     return (
       <div style={gradientStyle} className="flex flex-col h-screen text-white p-4">
-        {/* Header at the top but centered horizontally /}
+        {/* Header at the top but centered horizontally */}
         <header className="flex justify-center items-center w-full py-4">
           <h1 className="font-Raleway text-2xl font-bold">
             DiagnoSys
           </h1>
         </header>
 
-        {/ Rest of the content centered vertically and horizontally */}
+        {/* Rest of the content centered vertically and horizontally */}
         <div className="flex-grow flex flex-col items-center justify-center text-center">
           <p className="font-Raleway mb-12 text-2xl">
             Diagnose with Precision: Engage with Lifelike AI Patients
