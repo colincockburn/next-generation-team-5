@@ -4,7 +4,12 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
-  },
+    extend: {
+      fontFamily: {
+        // font-family: 'Raleway', sans-serif;
+       Raleway: ['Raleway', 'sans-serif'],
+      },
+    },
+  }, 
   plugins: [],
 }
