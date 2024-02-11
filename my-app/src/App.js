@@ -27,29 +27,32 @@ function App() {
     background: 'linear-gradient(to right, #081F2F, #0E4648, #081F2F)',
   };
 
+  async function resetStates() {
+    const thread = await createThread();
+    setThread(thread);
+    setMessages(["Patient: Hello doctor."])
+    setIsThinking(false);
+    setEvaluation("Evaluating...");
+    setTestState("Diagnosis in progress");
+  }
 
   // Define handleExitClick
   const handleExitClick = () => {
-    setAssistant(assistant);
-    setThread(thread);
+  
+    resetStates();
     setStartDiagnosis(false);
     setConvoFinished(false);
-    setThread(createThread())
     setMessages(["Patient: Hello doctor."])
     setStartDiagnosis(false);
     setDiagnosisSubmitted(false);
-    setTestState("Diagnosis in progress");
   };
 
   const handleExitFromDiagnosis = () => {
-    setAssistant(assistant);
-    setThread(thread);
+    resetStates();
     setStartDiagnosis(false);
     setConvoFinished(false);
     setDiagnosisSubmitted(false);
-    setThread(createThread())
     setMessages(["Patient: Hello doctor."])
-    setTestState("Diagnosis in progress");
     setDiagnosisUserInput('');
   };
 

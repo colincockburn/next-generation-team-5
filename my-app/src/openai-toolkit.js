@@ -1,6 +1,6 @@
 const OpenAI = require("openai");
 
-const openai = new OpenAI({apiKey: "", dangerouslyAllowBrowser: true});
+const openai = new OpenAI({apiKey: "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", dangerouslyAllowBrowser: true});
 
 // Export the functions you want to reuse
 module.exports = {
