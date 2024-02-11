@@ -14,27 +14,40 @@ function App() {
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef(null); // Add this line
   const [startDiagnosis, setStartDiagnosis] = useState(false);
+  const [testState, setTestState] = useState("Diagnosis in progress");
   const [convoFinished, setConvoFinished] = useState(false);
   const [diagnosisSubmitted, setDiagnosisSubmitted] = useState(false);
   // Define gradientStyle
   
   const gradientStyle = {
-    background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+    background: 'linear-gradient(to right, #081F2F, #0E4648, #081F2F)',
   };
+
 
   // Define handleExitClick
   const handleExitClick = () => {
+    setAssistant(assistant);
+    setThread(thread);
     setStartDiagnosis(false);
     setConvoFinished(false);
     setThread(createThread())
     setMessages(["Patient: Hello doctor."])
-    setAssistant(createAssistant(aiInstructions))
+    setStartDiagnosis(false);
+    setTestState("Diagnosis in progress");
   };
 
   // Define handleStartClick
   const handleStartClick = () => {
     setStartDiagnosis(true);
   };
+
+  useEffect(() => {
+    if (isThinking) {
+      setTestState("Patient is thinking...");
+    } else {
+      setTestState("patient is waiting for a responce");
+    }
+  }, [isThinking]);
 
   const handleConvoFinished = () => {
     setConvoFinished(true);
@@ -115,7 +128,8 @@ function App() {
         {/* Header with centered text and exit button */}
         <div className="flex justify-between items-center w-full p-4">
           <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
-          <span className="text-center font-Raleway font-light text-xl mt-4">Enter your detailed diagnosis</span>
+          <span className="text-center font-Raleway font-light text-xl mt-4">{testState}</span>
+
           <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
             Exit diagnosis ✖
           </button>
@@ -123,18 +137,33 @@ function App() {
         
         {/* Main content */}
         <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
+          {/* Chat messages */}
+          <div className="h-[60vh] w-[40vw] bg-white text-black overflow-auto p-4 rounded-xl mb-4 flex flex-col">
+            {messages.map((message, index) => (
+              <div key={index} className="whitespace-pre-line">{message}</div>
+            ))}
+          </div>
           {/* Flex container for microphone and input */}
           <div className="flex items-center space-x-4">
-            {/* Microphone icon */}
-            <button className="text-xl mb-6">🎤</button>
 
             {/* Input field */}
-            <input
-              type="text"
-              placeholder="Enter your diagnosis"
-              className="w-full mx-4 px-2 py-2 rounded-xl text-md mb-6 font-Raleway text-white"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-            />
+            <form onSubmit={handleSubmit} className="flex items-center space-x-4">
+              {/* Microphone icon */}
+              <button type="button" className="text-xl mb-6">🎤</button>
+              <input
+                type="text"
+                placeholder="Ask a question..."
+                className="w-full mx-4 px-2 py-2 rounded-xl text-md mb-6 font-Raleway text-white"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                onChange={handleInputChange}
+                value={input}
+                disabled={isThinking} // Disable input field while AI is thinking
+              />
+
+              {/* Prevent form from being submitted if input is empty */}
+              <button type="submit" style={{ display: 'none' }} />
+            </form> 
+
           </div>
           <button
           onClick={handleDiagnosisSubmitted}
