@@ -15,6 +15,8 @@ function App() {
   const messagesEndRef = useRef(null); // Add this line
   const [startDiagnosis, setStartDiagnosis] = useState(false);
   const [testState, setTestState] = useState("Diagnosis in progress");
+  const [convoFinished, setConvoFinished] = useState(false);
+  const [diagnosisSubmitted, setDiagnosisSubmitted] = useState(false);
   // Define gradientStyle
   
   const gradientStyle = {
@@ -26,6 +28,9 @@ function App() {
   const handleExitClick = () => {
     setAssistant(assistant);
     setThread(thread);
+    setStartDiagnosis(false);
+    setConvoFinished(false);
+    setThread(createThread())
     setMessages(["Patient: Hello doctor."])
     setStartDiagnosis(false);
     setTestState("Diagnosis in progress");
@@ -44,6 +49,15 @@ function App() {
     }
   }, [isThinking]);
 
+  const handleConvoFinished = () => {
+    setConvoFinished(true);
+    setStartDiagnosis(false);
+  };
+
+  const handleDiagnosisSubmitted = () => {
+    setConvoFinished(false);
+    setDiagnosisSubmitted(true);
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -79,8 +93,43 @@ function App() {
       <div style={gradientStyle} className="flex flex-col h-screen text-white">
         {/* Header with centered text and exit button */}
         <div className="flex justify-between items-center w-full p-4">
+        </div>
+        
+        {/* Main content */}
+        <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
+          {/* Flex container for microphone and input */}
+          <div className="flex items-center space-x-4">
+            {/* Microphone icon */}
+            <button className="text-xl mb-6">🎤</button>
+
+            {/* Input field */}
+            <input
+              type="text"
+              placeholder="Ask a question..."
+              className="w-full mx-4 px-2 py-2 rounded-xl text-md mb-6 font-Raleway text-white"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            />
+          </div>
+
+          {/* Finish conversation button */}
+          <button
+            onClick={handleConvoFinished}
+            className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
+          >
+            Finish Conversation
+          </button>
+        </div>
+      </div>
+    );
+  }
+  else if (convoFinished) {
+    return (
+      <div style={gradientStyle} className="flex flex-col h-screen text-white">
+        {/* Header with centered text and exit button */}
+        <div className="flex justify-between items-center w-full p-4">
           <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
           <span className="text-center font-Raleway font-light text-xl mt-4">{testState}</span>
+
           <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
             Exit diagnosis ✖
           </button>
@@ -114,13 +163,40 @@ function App() {
               {/* Prevent form from being submitted if input is empty */}
               <button type="submit" style={{ display: 'none' }} />
             </form> 
-          </div>
 
-          {/* Finish conversation button */}
+          </div>
+          <button
+          onClick={handleDiagnosisSubmitted}
+            className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
+          >
+            Submit Diagnosis
+          </button>
+        </div>
+      </div>
+    );
+  }
+  else if (diagnosisSubmitted) {
+    return (
+      <div style={gradientStyle} className="flex flex-col h-screen text-white">
+        {/* Header with centered text and exit button */}
+        <div className="flex justify-between items-center w-full p-4">
+          <div className="w-40" /> {/* Invisible spacer to balance the exit button */}
+          <span className="text-center font-Raleway font-light text-xl mt-4">Evlauation</span>
+          <button onClick={handleExitClick} className="font-Raleway text-xl mt-4 mr-4">
+            Exit diagnosis ✖
+          </button>
+        </div>
+        
+        {/* Main content */}
+        <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
+          {/* Flex container for microphone and input */}
+          <div className="flex items-center space-x-4">
+
+          </div>
           <button
             className="bg-[#15C99B] text-[#0A2735] font-Raleway font-bold text-lg py-4 px-8 rounded-xl hover:bg-teal-700 transition-colors duration-300"
           >
-            Finish Conversation
+            Finish
           </button>
         </div>
       </div>
