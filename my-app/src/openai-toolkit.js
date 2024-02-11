@@ -1,10 +1,11 @@
 const OpenAI = require("openai");
 
-const openai = new OpenAI({apiKey: "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", dangerouslyAllowBrowser: true});
+const openai = new OpenAI({apiKey: "", dangerouslyAllowBrowser: true});
 
 // Export the functions you want to reuse
 module.exports = {
     createAssistant,
+    createEvaluationAssistant,
     createThread,
     createMessage,
     createRun,
@@ -13,12 +14,23 @@ module.exports = {
     getChatResponse,
 };
 
-async function createAssistant(instructions="", model="gpt-3.5-turbo", name="john doe") {
+async function createAssistant(instructions="", condition, model="gpt-3.5-turbo") {
+
+    let instructionsStart = "you have the condition " + condition + ".";
+
     return await openai.beta.assistants.create({
-        name: name,
-        instructions: instructions,
+        instructions: instructionsStart + instructions,
         model: model
     });
+}
+
+async function createEvaluationAssistant(instructions="", condition, model="gpt-3.5-turbo") {
+
+    let instructionsStart = "you will be given the conversation between a doctor and a patient who has the condition  " + condition + ". ";
+    return await openai.beta.assistants.create({
+        instructions: instructionsStart + instructions,
+        model: model
+    })
 }
 
 async function createThread() {

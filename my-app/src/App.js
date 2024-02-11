@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import aiInstructions from './instructions';
+import evaluationInstructions from './evaluationInstructions';
 
-const { createAssistant, createThread, getChatResponse } = require('./openai-toolkit');
+const { createAssistant, createThread, getChatResponse, createEvaluationAssistant } = require('./openai-toolkit');
 // App.js
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
   const [testState, setTestState] = useState("Diagnosis in progress");
   const [convoFinished, setConvoFinished] = useState(false);
   const [diagnosisSubmitted, setDiagnosisSubmitted] = useState(false);
+  const [evaluationAssistant, setEvaluationAssistant] = useState(null);
+  const [evaluation, setEvaluation] = useState("Evaluating...");
   // Define gradientStyle
   
   const gradientStyle = {
@@ -68,18 +71,63 @@ function App() {
     setStartDiagnosis(false);
   };
 
-  const handleDiagnosisSubmitted = () => {
+
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevent the form from refreshing the page
+    setIsThinking(true); // Set isThinking to true
+    const submittedInput = input; // Store the value of input
+    setInput(''); // Clear input
+    setMessages([...messages, `\nYou: ${submittedInput}`]); // Update messages with user's input
+    const response = await getChatResponse(assistant, thread, submittedInput); // Use submittedInput instead of input
+    setMessages(prevMessages => [...prevMessages, `\nPatient: ${response}`]); // Update messages with AI's response
+    setIsThinking(false); // Set isThinking back to false
+  };
+
+
+  const handleDiagnosisSubmitted = async (event) => {
     setDiagnosisSubmitted(true); // Set diagnosisSubmitted to true first
     setConvoFinished(false); // Then set convoFinished to true
+    setIsThinking(true); // Set isThinking to true
+    const submittedInput = diagnosisUserInput; // Store the value of input
+    const responce = await getChatResponse(evaluationAssistant, thread, submittedInput); // Use submittedInput instead of input
+    setEvaluation(responce);
+    setIsThinking(false); // Set isThinking back to false
   };
+
 
   useEffect(() => {
     const init = async () => {
       let instructions = aiInstructions;
-      const assistant = await createAssistant(instructions=instructions);
+      const diagnosableConditions = [
+        "Depression",
+        "Anxiety",
+        "Hypertension (High Blood Pressure)",
+        "Diabetes Mellitus",
+        "Asthma",
+        "Thyroid Disorders (e.g., Hypothyroidism, Hyperthyroidism)",
+        "Migraines",
+        "Gastroesophageal Reflux Disease (GERD)",
+        "Irritable Bowel Syndrome (IBS)",
+        "Allergic Rhinitis",
+        "Sleep Disorders (e.g., Insomnia)",
+        "Eating Disorders (e.g., Anorexia, Bulimia)",
+        "Attention Deficit Hyperactivity Disorder (ADHD)",
+        "Obsessive-Compulsive Disorder (OCD)",
+        "Panic Disorder",
+        "Bipolar Disorder",
+        "Post-Traumatic Stress Disorder (PTSD)",
+        "Social Anxiety Disorder",
+        "Chronic Fatigue Syndrome",
+        "Fibromyalgia"
+      ];
+      
+      const randomCondition = diagnosableConditions[Math.floor(Math.random() * diagnosableConditions.length)];
+      const assistant = await createAssistant(instructions=instructions, randomCondition);
       const thread = await createThread();
+      const evalAssistant = await createEvaluationAssistant(instructions=evaluationInstructions, randomCondition);
       setAssistant(assistant);
       setThread(thread);
+      setEvaluationAssistant(evalAssistant)
       setMessages(["Patient: Hello doctor."])
     };
     init();
@@ -92,18 +140,8 @@ function App() {
 
   const handleDiagnosisInputChange = (event) => {
     setDiagnosisUserInput(event.target.value);
-  }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent the form from refreshing the page
-    setIsThinking(true); // Set isThinking to true
-    const submittedInput = input; // Store the value of input
-    setInput(''); // Clear input
-    setMessages([...messages, `\nYou: ${submittedInput}`]); // Update messages with user's input
-    const response = await getChatResponse(assistant, thread, submittedInput); // Use submittedInput instead of input
-    setMessages(prevMessages => [...prevMessages, `\nPatient: ${response}`]); // Update messages with AI's response
-    setIsThinking(false); // Set isThinking back to false
-  };
+  }
 
 
   if (startDiagnosis) {
@@ -210,7 +248,7 @@ function App() {
           {/* Flex container for microphone and input */}
           <div className="flex items-center space-x-4">
             <p className="font-Raleway text-2xl text-center">
-              Your diagnosis has been submitted. Thank you for your time.
+              {evaluation}
             </p>
           </div>
           <button onClick={handleExitClick}
