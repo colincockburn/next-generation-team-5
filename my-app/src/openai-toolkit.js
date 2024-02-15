@@ -1,6 +1,6 @@
 const OpenAI = require("openai");
 
-const openai = new OpenAI({apiKey: "", dangerouslyAllowBrowser: true});
+const openai = new OpenAI({apiKey: process.env.REACT_APP_API_KEY, dangerouslyAllowBrowser: true});
 
 // Export the functions you want to reuse
 module.exports = {

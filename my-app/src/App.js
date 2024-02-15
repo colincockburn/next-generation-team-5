@@ -3,10 +3,11 @@ import logo from './logo.svg';
 import './App.css';
 import aiInstructions from './instructions';
 import evaluationInstructions from './evaluationInstructions';
+const openai = require('openai');
 
 const { createAssistant, createThread, getChatResponse, createEvaluationAssistant } = require('./openai-toolkit');
-// App.js
 
+// App.js
 function App() {
   const [input, setInput] = useState('');
   const [diagnosisUserInput, setDiagnosisUserInput] = useState('');
@@ -76,6 +77,7 @@ function App() {
     event.preventDefault(); // Prevent the form from refreshing the page
     setIsThinking(true); // Set isThinking to true
     const submittedInput = input; // Store the value of input
+    playAudio(submittedInput);
     setInput(''); // Clear input
     setMessages([...messages, `\nYou: ${submittedInput}`]); // Update messages with user's input
     const response = await getChatResponse(assistant, thread, submittedInput); // Use submittedInput instead of input
@@ -89,10 +91,44 @@ function App() {
     setConvoFinished(false); // Then set convoFinished to true
     setIsThinking(true); // Set isThinking to true
     const submittedInput = diagnosisUserInput; // Store the value of input
-    const responce = await getChatResponse(evaluationAssistant, thread, submittedInput); // Use submittedInput instead of input
-    setEvaluation(responce);
+    const response = await getChatResponse(evaluationAssistant, thread, submittedInput); // Use submittedInput instead of input
+    setEvaluation(response);
     setIsThinking(false); // Set isThinking back to false
   };
+
+async function playAudio(message) {
+    console.log(message);
+  
+    try {
+        const mp3 = await openai.audio.speech.create({
+            model: "tts-1",
+            voice: "onyx",
+            input: message,
+        });
+
+        // Convert the audio buffer to a Blob
+        const blob = new Blob([Buffer.from(await mp3.arrayBuffer())], { type: 'audio/mpeg' });
+
+        // Create a URL for the Blob
+        const url = URL.createObjectURL(blob);
+
+        // Create an Audio element
+        const audio = new Audio(url);
+
+        // Play the audio
+        audio.play();
+
+        // Clean up the URL when the audio finishes playing
+        audio.addEventListener('ended', () => {
+            URL.revokeObjectURL(url);
+        });
+  
+    } catch (error) {
+        console.error('Error playing audio:', error);
+    }
+}
+
+
 
 
   useEffect(() => {
@@ -161,7 +197,7 @@ function App() {
         {/* Main content */}
         <div className="flex-grow flex flex-col items-center justify-center space-y-4 p-4">
           {/* Chat messages */}
-          <div className="h-[60vh] w-[40vw] bg-[#565656] text-white bg-opacity-40 overflow-auto p-4 rounded-xl mb-4 flex flex-col">
+          <div className="h-[60vh] font-Raleway w-[40vw] bg-[#565656] text-white bg-opacity-40 overflow-auto p-4 rounded-xl mb-4 flex flex-col">
             {messages.map((message, index) => (
               <div key={index} className="whitespace-pre-line">{message}</div>
             ))}

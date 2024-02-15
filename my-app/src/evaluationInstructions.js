@@ -1,3 +1,3 @@
 // instructions.js
-const evaluationInstructions = " following this you will be given the doctors sarb report of the patient. I want you to evaluate the doctors performance. the goal if for the doctor to be accurate, and concise with their desctiption of the patient. please provide a rating out of 10 for both accuracy and efficiency with their sarb report. please keep responces under 100 words. please do this from the perspective of a supervising doctor";
+const evaluationInstructions = " following this you will be given the doctors SBAR report of the patient. I want you to evaluate the doctors report of the attached condition. Provide feedback on the accuracy of the diagnosis and the efficiency of the conversation with the patient. Do this from the perspective of a supervising doctor and give a score from 1 to 10.";
 export default evaluationInstructions;
